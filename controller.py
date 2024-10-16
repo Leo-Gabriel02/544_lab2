@@ -8,6 +8,15 @@ M_PI=3.1415926535
 
 P=0; PD=1; PI=2; PID=3
 
+# Setting saturation limits
+# TurtleBot 3: max angular = 2.84, max linear = 0.22
+# TurtleBot 4: max angular = 1.9, max linear = 0.31
+TurtleBot = 3
+if TurtleBot == 3:
+    max_angular = 2.84, max_linear = 0.22
+elif TurtleBot == 4:
+    max_angular = 1.9, max_linear = 0.31
+
 class controller:
     
     
@@ -29,9 +38,8 @@ class controller:
         angular_vel=self.PID_angular.update([e_ang, pose[3]], status)
         
         # TODO Part 4: Add saturation limits for the robot linear and angular velocity
-
-        linear_vel = ... if linear_vel > 1.0 else linear_vel
-        angular_vel= ... if angular_vel > 1.0 else angular_vel
+        linear_vel = max_linear if linear_vel > max_linear else linear_vel 
+        angular_vel= max_angular if angular_vel > max_angular else angular_vel
         
         return linear_vel, angular_vel
     
@@ -56,9 +64,8 @@ class trajectoryController(controller):
         angular_vel=self.PID_angular.update([e_ang, pose[3]], status) 
 
         # TODO Part 5: Add saturation limits for the robot linear and angular velocity
-
-        linear_vel = ... if linear_vel > ... else linear_vel
-        angular_vel= ... if angular_vel > ... else angular_vel
+        linear_vel = max_linear if linear_vel > max_linear else linear_vel 
+        angular_vel= max_angular if angular_vel > max_angular else angular_vel
         
         return linear_vel, angular_vel
 

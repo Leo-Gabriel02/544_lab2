@@ -20,7 +20,7 @@ from controller import controller, trajectoryController
 
 # You may add any other imports you may need/want to use below
 # import ...
-
+import rclpy
 
 class decision_maker(Node):
     
@@ -29,7 +29,7 @@ class decision_maker(Node):
         super().__init__("decision_maker")
 
         #TODO Part 4: Create a publisher for the topic responsible for robot's motion
-        self.publisher=... 
+        self.publisher=self.create_publisher(publishing_topic, publisher_msg, qos_publisher) #???
 
         publishing_period=1/rate
         
@@ -63,6 +63,7 @@ class decision_maker(Node):
         
         # TODO Part 3: Run the localization node
         ...    # Remember that this file is already running the decision_maker node.
+        spin_once(self.localizer) # Run localization node once
 
         if self.localizer.getPose()  is  None:
             print("waiting for odom msgs ....")
@@ -71,10 +72,13 @@ class decision_maker(Node):
         vel_msg=Twist()
         
         # TODO Part 3: Check if you reached the goal
-        if type(self.goal) == list:
-            reached_goal=...
-        else: 
-            reached_goal=...
+        threshold = 0.1
+        if type(self.goal) == list: # If the goal is a list it's a goal trajectory
+            error = calculate_linear_error(self.localizer.getPose(), self.goal[-1]) # Calculate error
+            reached_goal = error < threshold 
+        else: # The goal is a point 
+            error = calculate_linear_error(self.localizer.getPose(), self.goal)
+            reached_goal = error < threshold # Calculate error
         
 
         if reached_goal:
@@ -85,12 +89,14 @@ class decision_maker(Node):
             self.controller.PID_linear.logger.save_log()
             
             #TODO Part 3: exit the spin
-            ... 
+            rclpy.shutdown() # Break 
         
         velocity, yaw_rate = self.controller.vel_request(self.localizer.getPose(), self.goal, True)
 
         #TODO Part 4: Publish the velocity to move the robot
-        ... 
+        vel_msg.angular.z = yaw_rate
+        vel_msg.linear.x = velocity
+        self.vel_publisher.publish(vel_msg) 
 
 import argparse
 
@@ -101,18 +107,23 @@ def main(args=None):
 
     # TODO Part 3: You migh need to change the QoS profile based on whether you're using the real robot or in simulation.
     # Remember to define your QoS profile based on the information available in "ros2 topic info /odom --verbose" as explained in Tutorial 3
-    
-    odom_qos=QoSProfile(reliability=2, durability=2, history=1, depth=10)
+
+    # Same as localization.py
+    odom_qos=QoSProfile(
+            reliability = rclpy.qos.ReliabilityPolicy.RELIABLE,
+            durability = rclpy.qos.DurabilityPolicy.VOLATILE,
+            history = rclpy.qos.HistoryPolicy.KEEP_LAST,
+            depth = 10
+        )
     
 
     # TODO Part 4: instantiate the decision_maker with the proper parameters for moving the robot
     if args.motion.lower() == "point":
-        DM=decision_maker(...)
+        DM=decision_maker(Twist, "/cmd_vel", 10, planner(0).plan())
     elif args.motion.lower() == "trajectory":
-        DM=decision_maker(...)
+        DM=decision_maker(Twist, "/cmd_vel", 10, planner(1).plan())
     else:
         print("invalid motion type", file=sys.stderr)        
-    
     
     
     try:
