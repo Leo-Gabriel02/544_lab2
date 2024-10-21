@@ -29,7 +29,7 @@ class decision_maker(Node):
         super().__init__("decision_maker")
 
         #TODO Part 4: Create a publisher for the topic responsible for robot's motion
-        self.publisher=self.create_publisher(publishing_topic, publisher_msg, qos_publisher) #???
+        self.publisher=self.create_publisher(publisher_msg, publishing_topic, qos_publisher) #???
 
         publishing_period=1/rate
         
@@ -72,7 +72,7 @@ class decision_maker(Node):
         vel_msg=Twist()
         
         # TODO Part 3: Check if you reached the goal
-        threshold = 0.1
+        threshold = 0.01
         if type(self.goal) == list: # If the goal is a list it's a goal trajectory
             error = calculate_linear_error(self.localizer.getPose(), self.goal[-1]) # Calculate error
             reached_goal = error < threshold 
@@ -96,7 +96,7 @@ class decision_maker(Node):
         #TODO Part 4: Publish the velocity to move the robot
         vel_msg.angular.z = yaw_rate
         vel_msg.linear.x = velocity
-        self.vel_publisher.publish(vel_msg) 
+        self.publisher.publish(vel_msg) 
 
 import argparse
 

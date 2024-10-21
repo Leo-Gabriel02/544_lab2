@@ -55,10 +55,10 @@ class PID_ctrl:
         
         for i in range(1, len(self.history)):
             
-            t0=Time.from_msg(self.history[i-1][1])
-            t1=Time.from_msg(self.history[i][1])
+            t0=self.history[i-1][1]
+            t1=self.history[i][1]
             
-            dt=(t1.nanoseconds - t0.nanoseconds) / 1e9
+            dt=(t1 - t0) / 1e9
             
             dt_avg+=dt
 
@@ -86,10 +86,10 @@ class PID_ctrl:
             return latest_error*self.kp
         
         elif self.type == PD:
-            return latest_error*self.kp + error_dot*self.kd
+            return latest_error*self.kp + error_dot*self.kv
 
         elif self.type == PI:
             return latest_error*self.kp + error_int*self.ki
         
         elif self.type == PID:
-            return latest_error*self.kp + error_int*self.ki + error_dot*self.kd
+            return latest_error*self.kp + error_int*self.ki + error_dot*self.kv

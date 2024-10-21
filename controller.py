@@ -13,9 +13,11 @@ P=0; PD=1; PI=2; PID=3
 # TurtleBot 4: max angular = 1.9, max linear = 0.31
 TurtleBot = 3
 if TurtleBot == 3:
-    max_angular = 2.84, max_linear = 0.22
+    max_angular = 2.84
+    max_linear = 0.22
 elif TurtleBot == 4:
-    max_angular = 1.9, max_linear = 0.31
+    max_angular = 1.9
+    max_linear = 0.31
 
 class controller:
     
@@ -24,14 +26,15 @@ class controller:
     def __init__(self, klp=0.2, klv=0.2, kli=0.2, kap=0.2, kav=0.2, kai=0.2):
         
         # TODO Part 5 and 6: Modify the below lines to test your PD, PI, and PID controller
-        self.PID_linear=PID_ctrl(P, klp, klv, kli, filename_="linear.csv")
-        self.PID_angular=PID_ctrl(P, kap, kav, kai, filename_="angular.csv")
+        self.PID_linear=PID_ctrl(PID, klp, klv, kli, filename_="linear.csv")
+        self.PID_angular=PID_ctrl(PID, kap, kav, kai, filename_="angular.csv")
 
     
     def vel_request(self, pose, goal, status):
         
         e_lin=calculate_linear_error(pose, goal)
         e_ang=calculate_angular_error(pose, goal)
+        print(e_lin, e_ang)
 
 
         linear_vel=self.PID_linear.update([e_lin, pose[3]], status)
