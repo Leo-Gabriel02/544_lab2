@@ -9,7 +9,7 @@ PID=3 # proportional, integral, derivative
 
 class PID_ctrl:
     
-    def __init__(self, type_, kp=1.2,kv=0.8,ki=0.2, history_length=3, filename_="errors.csv"):
+    def __init__(self, type_, kp,kv,ki, history_length=3, filename_="errors.csv"):
         
         # Data for the controller
         self.history_length=history_length
@@ -55,10 +55,10 @@ class PID_ctrl:
         
         for i in range(1, len(self.history)):
             
-            t0=Time.from_msg(self.history[i-1][1])
-            t1=Time.from_msg(self.history[i][1])
+            t0=self.history[i-1][1]
+            t1=self.history[i][1]
             
-            dt=(t1.nanoseconds - t0.nanoseconds) / 1e9
+            dt=(t1 - t0) / 1e9
             
             dt_avg+=dt
 
@@ -86,10 +86,18 @@ class PID_ctrl:
             return latest_error*self.kp
         
         elif self.type == PD:
+<<<<<<< HEAD
             return latest_error*self.kp + error_dot*self.kd
+=======
+            return latest_error*self.kp + error_dot*self.kv
+>>>>>>> 82dda358b33b295f36f6fca7e6fa67da7c26d916
 
         elif self.type == PI:
             return latest_error*self.kp + error_int*self.ki
         
         elif self.type == PID:
+<<<<<<< HEAD
             return latest_error*self.kp + error_int*self.ki + error_dot*self.kd
+=======
+            return latest_error*self.kp + error_int*self.ki + error_dot*self.kv
+>>>>>>> 82dda358b33b295f36f6fca7e6fa67da7c26d916

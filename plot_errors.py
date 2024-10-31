@@ -21,16 +21,20 @@ def plot_errors(filename):
 
 
     axes[0].plot([lin[0] for lin in values], [lin[1] for lin in values])
-    axes[0].set_title("state space")
+    axes[0].set_title("E vs E dot (Angular - PID Control)")
     axes[0].grid()
+    axes[0].set_xlabel("E")
+    axes[0].set_ylabel("E dot")
 
     
-    axes[1].set_title("each individual state")
-    for i in range(0, len(headers) - 1):
-        axes[1].plot(time_list, [lin[i] for lin in values], label= headers[i]+ " linear")
+    axes[1].set_title("Individual States (Angular - PID Control)")
+    for i in range(0, len(headers) - 2):
+        axes[1].plot(time_list, [lin[i] for lin in values], label= headers[i])
 
     axes[1].legend()
     axes[1].grid()
+    axes[1].set_xlabel("Time (s)")
+    axes[1].set_ylabel("Angle [rad]")
 
     plt.show()
     

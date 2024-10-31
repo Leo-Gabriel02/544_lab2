@@ -1,5 +1,8 @@
 
 from math import atan2, asin, sqrt
+from scipy.spatial.transform import Rotation
+
+TurtleBot = 4
 
 M_PI=3.1415926535
 
@@ -92,7 +95,8 @@ def euler_from_quaternion(quat):
     """
     yaw =  Rotation.from_quat([quat.x, quat.y, quat.z, quat.w]).as_euler('xyz')[2] # just unpack yaw
 
-    # just unpack yaw
+    yaw =  Rotation.from_quat([quat.x, quat.y, quat.z, quat.w]).as_euler('xyz')[2] # just unpack yaw
+
     return yaw
 
 
@@ -102,7 +106,11 @@ def calculate_linear_error(current_pose, goal_pose):
     # Compute the linear error in x and y
     # Remember that current_pose = [x,y, theta, time stamp] and goal_pose = [x,y]
     # Remember to use the Euclidean distance to calculate the error.
+<<<<<<< HEAD
     error_linear = sqrt((goal_pose[0] - current_pose[0])^2 + (goal_pose[1] - current_pose[1])^2)
+=======
+    error_linear = sqrt((goal_pose[0] - current_pose[0])**2 + (goal_pose[1] - current_pose[1])**2)
+>>>>>>> 82dda358b33b295f36f6fca7e6fa67da7c26d916
 
     return error_linear
 
@@ -113,10 +121,26 @@ def calculate_angular_error(current_pose, goal_pose):
     # Remember that current_pose = [x,y, theta, time stamp] and goal_pose = [x,y]
     # Use atan2 to find the desired orientation
     # Remember that this function returns the difference in orientation between where the robot currently faces and where it should face to reach the goal
+<<<<<<< HEAD
     error_angular = atan2(goal_pose[1] - current_pose[1], goal_pose[0] - current_pose[0])
+=======
+    error_angular = atan2(goal_pose[1] - current_pose[1], goal_pose[0]- current_pose[0]) - current_pose[2]
+    print(atan2(goal_pose[1] - current_pose[1], goal_pose[0]- current_pose[0]), current_pose[2])
+>>>>>>> 82dda358b33b295f36f6fca7e6fa67da7c26d916
 
     # Remember to handle the cases where the angular error might exceed the range [-π, π]
+    if error_angular > M_PI:
+        error_angular = error_angular - 2*M_PI
+    elif error_angular < -M_PI:
+        error_angular = error_angular + 2*M_PI
 
+<<<<<<< HEAD
     # ... i feel like atan2 already does this xd
 
+=======
+    #print(atan2(goal_pose[1] - current_pose[1], goal_pose[0]- current_pose[0]), current_pose[2], error_angular)
+
+    # ... i feel like atan2 already does this xd XD
+    
+>>>>>>> 82dda358b33b295f36f6fca7e6fa67da7c26d916
     return error_angular

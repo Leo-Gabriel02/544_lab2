@@ -2,45 +2,65 @@ import numpy as np
 
 
 from pid import PID_ctrl
-from utilities import euler_from_quaternion, calculate_angular_error, calculate_linear_error
+from utilities import euler_from_quaternion, calculate_angular_error, calculate_linear_error, TurtleBot
 
 M_PI=3.1415926535
 
 P=0; PD=1; PI=2; PID=3
 
+# Setting saturation limits
+# TurtleBot 3: max angular = 2.84, max linear = 0.22
+# TurtleBot 4: max angular = 1.9, max linear = 0.31
+if TurtleBot == 3:
+    max_angular = 2.84
+    max_linear = 0.22
+elif TurtleBot == 4:
+    max_angular = 1.9
+    max_linear = 0.31
+
+klp = 0.5
+klv = 0.2
+kli = 1.5
+kap = 1
+kav = 0.3
+kai = 0.6
+TYPE = PID
+MOTION = "traj-sigmoid"
+
 class controller:
     
     
     # Default gains of the controller for linear and angular motions
-    def __init__(self, klp=0.2, klv=0.2, kli=0.2, kap=0.2, kav=0.2, kai=0.2):
+    def __init__(self):
         
         # TODO Part 5 and 6: Modify the below lines to test your PD, PI, and PID controller
-        self.PID_linear=PID_ctrl(P, klp, klv, kli, filename_="linear.csv")
-        self.PID_angular=PID_ctrl(P, kap, kav, kai, filename_="angular.csv")
+        data = f"{MOTION}-{TYPE}-{klp}-{klv}-{kli}-{kap}-{kav}-{kai}".replace(".", "")
+        self.PID_linear=PID_ctrl(TYPE, klp, klv, kli, filename_=f"CSVs/linear-{data}.csv")
+        self.PID_angular=PID_ctrl(TYPE, kap, kav, kai, filename_=f"CSVs/angular-{data}.csv")
 
     
     def vel_request(self, pose, goal, status):
         
         e_lin=calculate_linear_error(pose, goal)
         e_ang=calculate_angular_error(pose, goal)
+        print(e_lin, e_ang) # Debug print
 
 
         linear_vel=self.PID_linear.update([e_lin, pose[3]], status)
         angular_vel=self.PID_angular.update([e_ang, pose[3]], status)
         
         # TODO Part 4: Add saturation limits for the robot linear and angular velocity
-
-        linear_vel = ... if linear_vel > 1.0 else linear_vel
-        angular_vel= ... if angular_vel > 1.0 else angular_vel
+        linear_vel = max_linear if linear_vel > max_linear else linear_vel 
+        angular_vel= max_angular if angular_vel > max_angular else angular_vel
         
         return linear_vel, angular_vel
     
 
 class trajectoryController(controller):
 
-    def __init__(self, klp=0.2, klv=0.2, kli=0.2, kap=0.2, kav=0.2, kai=0.2):
+    def __init__(self):
         
-        super().__init__(klp, klv, kli, kap, kav, kai)
+        super().__init__()
     
     def vel_request(self, pose, listGoals, status):
         
@@ -50,15 +70,15 @@ class trajectoryController(controller):
         
         e_lin=calculate_linear_error(pose, finalGoal)
         e_ang=calculate_angular_error(pose, goal)
+        print(e_lin, e_ang) # Debug print
 
         # stamped_error is [error, timestamp]
         linear_vel=self.PID_linear.update([e_lin, pose[3]], status)
         angular_vel=self.PID_angular.update([e_ang, pose[3]], status) 
 
         # TODO Part 5: Add saturation limits for the robot linear and angular velocity
-
-        linear_vel = ... if linear_vel > ... else linear_vel
-        angular_vel= ... if angular_vel > ... else angular_vel
+        linear_vel = max_linear if linear_vel > max_linear else linear_vel 
+        angular_vel= max_angular if angular_vel > max_angular else angular_vel
         
         return linear_vel, angular_vel
 
