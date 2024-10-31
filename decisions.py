@@ -3,7 +3,7 @@
 
 import sys
 
-from utilities import euler_from_quaternion, calculate_angular_error, calculate_linear_error
+from utilities import euler_from_quaternion, calculate_angular_error, calculate_linear_error, TurtleBot
 from pid import PID_ctrl
 
 from rclpy import init, spin, spin_once
@@ -18,6 +18,9 @@ from localization import localization, rawSensor
 from planner import TRAJECTORY_PLANNER, POINT_PLANNER, planner
 from controller import controller, trajectoryController
 
+from irobot_create_msgs.srv import ResetPose
+
+
 # You may add any other imports you may need/want to use below
 # import ...
 import rclpy
@@ -30,6 +33,13 @@ class decision_maker(Node):
 
         #TODO Part 4: Create a publisher for the topic responsible for robot's motion
         self.publisher=self.create_publisher(publisher_msg, publishing_topic, qos_publisher) #???
+
+        # print("resetting odom...")
+        # self.odom_cli = self.create_client(ResetPose, "/reset_pose")
+
+        # future = self.odom_cli.call(ResetPose.Request())
+        # rclpy.spin_until_future_complete(self, future)
+        # print("odom reset! yay!")
 
         publishing_period=1/rate
         
@@ -75,7 +85,7 @@ class decision_maker(Node):
         
         # TODO Part 3: Check if you reached the goal
         threshold = 0.01
-        if type(self.goal) == tuple: # If the goal is a list it's a goal trajectory
+        if len(self.goal) > 2: # If the goal is a list it's a goal trajectory
             error = calculate_linear_error(self.localizer.getPose(), self.goal[-1]) # Calculate error
             reached_goal = error < threshold 
         else: # The goal is a point 
@@ -111,13 +121,20 @@ def main(args=None):
     # Remember to define your QoS profile based on the information available in "ros2 topic info /odom --verbose" as explained in Tutorial 3
 
     # Same as localization.py
-    odom_qos=QoSProfile(
-            reliability = rclpy.qos.ReliabilityPolicy.RELIABLE,
-            durability = rclpy.qos.DurabilityPolicy.VOLATILE,
-            history = rclpy.qos.HistoryPolicy.KEEP_LAST,
-            depth = 10
-        )
-    
+    if TurtleBot == 3:
+        odom_qos=QoSProfile(
+                reliability = rclpy.qos.ReliabilityPolicy.RELIABLE,
+                durability = rclpy.qos.DurabilityPolicy.VOLATILE,
+                history = rclpy.qos.HistoryPolicy.KEEP_LAST,
+                depth = 10
+            )
+    else:
+        odom_qos=QoSProfile(
+                reliability = rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
+                durability = rclpy.qos.DurabilityPolicy.VOLATILE,
+                history = rclpy.qos.HistoryPolicy.KEEP_LAST,
+                depth = 10
+            )
 
     # TODO Part 4: instantiate the decision_maker with the proper parameters for moving the robot
     if args.motion.lower() == "point":
